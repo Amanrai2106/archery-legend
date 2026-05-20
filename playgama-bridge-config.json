@@ -1,0 +1,15 @@
+{
+    "platforms": {
+        "mock": {
+            "name": "Mock"
+        }
+    },
+    "advertisement": {
+        "interstitial": {
+            "enabled": true
+        },
+        "rewarded": {
+            "enabled": true
+        }
+    }
+}
