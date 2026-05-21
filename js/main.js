@@ -7,17 +7,48 @@ if (typeof bridge !== 'undefined') {
             console.log("Playgama Bridge initialized");
             bridge.platform.sendMessage('game_ready');
 
+            // Load Saved High Score
+            bridge.storage.get('bestScore')
+                .then(value => {
+                    if (value) {
+                        bestScore = parseInt(value);
+                        document.getElementById("best").innerHTML = bestScore;
+                        console.log("Loaded high score:", bestScore);
+                    }
+                })
+                .catch(err => console.error("Error loading score:", err));
+
             // Handle Game Visibility (Pause/Resume Sound)
             bridge.game.on('visibility_state_changed', (state) => {
                 if (state === 'hidden') {
                     if (bgSound) bgSound.pause();
                 } else {
-                    if (bgSound && !bgSound.paused && runCount > 0) bgSound.play().catch(e => {});
+                    if (bgSound && !isMuted && runCount > 0) bgSound.play().catch(e => {});
                 }
             });
         })
         .catch(error => console.error("Playgama Bridge init failed:", error));
 }
+
+var isMuted = false;
+var muteBtn = document.getElementById("muteBtn");
+
+muteBtn.addEventListener("click", function() {
+    isMuted = !isMuted;
+    muteBtn.innerHTML = isMuted ? "🔇" : "🔊";
+    
+    // Update all audio objects
+    var sounds = [startSound, shootSound, hitSound, bgSound, endSound, successSound, highScoreSound];
+    sounds.forEach(s => {
+        if (s) s.muted = isMuted;
+    });
+
+    if (isMuted) {
+        if (bgSound) bgSound.pause();
+    } else {
+        if (runCount > 0 && bgSound && bgSound.paused) bgSound.play().catch(e => {});
+    }
+});
 
 String.prototype.repeat =  String.prototype.repeat ||
   function(c){
@@ -48,8 +79,10 @@ function startGame(){
     rewardBtn.style.display = "none"; // Hide reward button when starting
     loadGame();
     try{
-        startSound.play().catch(function(e){});
-        if(bgSound.paused) bgSound.play().catch(function(e){});
+        if (!isMuted) {
+            startSound.play().catch(function(e){});
+            if(bgSound.paused) bgSound.play().catch(function(e){});
+        }
         if(runCount == 0){
         endSound.play().catch(function(e){})
         hitSound.play().catch(function(e){});
@@ -97,20 +130,29 @@ function showRewardedAd(event) {
     }
     console.log("Attempting to show rewarded ad...");
     if (typeof bridge !== 'undefined' && bridge.advertisement) {
+        // Pause audio while ad is playing
+        if (bgSound) bgSound.pause();
+        
         bridge.advertisement.showRewarded()
-            .then(() => {
-                // User watched the ad, give reward
+            .then((result) => {
+                // Check if ad was completed (result is usually undefined or true depending on bridge version)
+                // The .then() only triggers if the ad was watched successfully in many SDK versions
+                console.log("Rewarded ad completed successfully");
+                
                 rewardBtn.style.display = "none";
                 startPage.style.display = "none";
                 
                 // Add 5 more arrows to the existing session
-                // We need to access totalArr inside loadGame
-                // This is a bit tricky due to scope, let's trigger a continue function
                 window.continueGame(5);
+                
+                // Resume audio if not muted
+                if (!isMuted && bgSound) bgSound.play().catch(e => {});
             })
             .catch(error => {
                 console.error("Rewarded ad failed or closed early:", error);
                 alert("Watch the full ad to get extra arrows!");
+                // Resume audio if not muted
+                if (!isMuted && bgSound) bgSound.play().catch(e => {});
             });
     }
 }
@@ -462,6 +504,12 @@ function loadGame(){
                                 document.getElementById("title").innerHTML = "Your Score<br>"+totalScore;
                                 if(bestScore < totalScore){
                                     bestScore = totalScore;
+                                    // Save High Score to Playgama Storage
+                                    if (typeof bridge !== 'undefined') {
+                                        bridge.storage.set('bestScore', bestScore.toString())
+                                            .then(() => console.log("Score saved successfully"))
+                                            .catch(err => console.error("Error saving score:", err));
+                                    }
                                     try{
                                         highScoreSound.play().catch(function(e){});
                                     }catch(err){

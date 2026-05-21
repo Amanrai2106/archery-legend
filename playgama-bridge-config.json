@@ -4,6 +4,9 @@
             "name": "Mock"
         }
     },
+    "storage": {
+        "default_type": "local_storage"
+    },
     "advertisement": {
         "interstitial": {
             "enabled": true
