@@ -109,7 +109,15 @@ hitSound.src = "hit.mp3";
 
 var bgSound = new Audio();
 bgSound.src = "bg.mp3";
-bgSound.loop = true;
+bgSound.loop = false; // We'll handle looping manually
+
+// Custom loop: When music ends, restart from 5 seconds
+bgSound.addEventListener('ended', function() {
+    this.currentTime = 5;
+    if (!isMuted) {
+        this.play().catch(e => {});
+    }
+});
 //bgSound.volume = 0.8;
 
 var endSound = new Audio();
