@@ -105,10 +105,10 @@ var shootSound = new Audio();
 shootSound.src = "https://"+asrcd+".000webhostapp.com/snd/arrow.ogg";
 
 var hitSound = new Audio();
-hitSound.src = "https://"+asrcd+".000webhostapp.com/snd/arrowhit.ogg";
+hitSound.src = "hit.mp3";
 
 var bgSound = new Audio();
-bgSound.src = "https://"+asrcd+".000webhostapp.com/snd/bg.mp3"//"music2.ogg";
+bgSound.src = "bg.mp3";
 bgSound.loop = true;
 //bgSound.volume = 0.8;
 
