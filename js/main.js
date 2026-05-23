@@ -34,11 +34,12 @@ var isMuted = false;
 var muteBtn = document.getElementById("muteBtn");
 
 muteBtn.addEventListener("click", function() {
+    if (!isMuted) clickSound.play().catch(e => {});
     isMuted = !isMuted;
     muteBtn.innerHTML = isMuted ? "🔇" : "🔊";
     
     // Update all audio objects
-    var sounds = [startSound, shootSound, hitSound, bgSound, endSound, successSound, highScoreSound];
+    var sounds = [startSound, shootSound, hitSound, bgSound, endSound, successSound, highScoreSound, clickSound];
     sounds.forEach(s => {
         if (s) s.muted = isMuted;
     });
@@ -69,10 +70,14 @@ rewardBtn.style.display = "none";
 // Reverting to whole page click for better mobile support, but excluding rewardBtn
 startPage.addEventListener("click", function(e) {
     if (e.target !== rewardBtn && startPage.style.display !== "none") {
+        if (!isMuted) clickSound.play().catch(e => {});
         startGame();
     }
 });
-rewardBtn.addEventListener("click", showRewardedAd);
+rewardBtn.addEventListener("click", function(e) {
+    if (!isMuted) clickSound.play().catch(e => {});
+    showRewardedAd(e);
+});
 
 function startGame(){
     startPage.style.display = "none";
@@ -98,11 +103,11 @@ var bestScore = 0;
 var runCount = 0;
 
 var startSound = new Audio();
-startSound.src = "https://"+asrcd+".000webhostapp.com/snd/whistlestart.ogg";
+startSound.src = "start.mp3";
 startSound.volume = 0.6;
 
 var shootSound = new Audio();
-shootSound.src = "https://"+asrcd+".000webhostapp.com/snd/arrow.ogg";
+shootSound.src = "arrow.mp3";
 
 var hitSound = new Audio();
 hitSound.src = "hit.mp3";
@@ -121,14 +126,17 @@ bgSound.addEventListener('ended', function() {
 //bgSound.volume = 0.8;
 
 var endSound = new Audio();
-endSound.src = "https://"+asrcd+".000webhostapp.com/snd/whistleover.ogg";
+endSound.src = "gameover.mp3";
 endSound.volume = 0.6;
 
+var clickSound = new Audio();
+clickSound.src = "click.mp3";
+
 var successSound = new Audio();
-successSound.src = "https://"+asrcd+".000webhostapp.com/snd/bell.ogg";
+successSound.src = "bell.ogg";
 
 var highScoreSound = new Audio();
-highScoreSound.src = "https://"+asrcd+".000webhostapp.com/snd/crowdcheer.ogg";
+highScoreSound.src = "crowdcheer.ogg";
 
 
 function showRewardedAd(event) {
