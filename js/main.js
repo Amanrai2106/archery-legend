@@ -67,13 +67,22 @@ var rewardBtn = document.getElementById("rewardBtn");
 // Ensure reward button is hidden at start
 rewardBtn.style.display = "none";
 
-// Reverting to whole page click for better mobile support, but excluding rewardBtn
+// Only restart game when the start button is specifically clicked
+startBtn.addEventListener("click", function(e) {
+    if (!isMuted) clickSound.play().catch(e => {});
+    startGame();
+});
+
+// Remove the whole-page click listener that was causing accidental restarts
+/*
 startPage.addEventListener("click", function(e) {
     if (e.target !== rewardBtn && startPage.style.display !== "none") {
         if (!isMuted) clickSound.play().catch(e => {});
         startGame();
     }
 });
+*/
+
 rewardBtn.addEventListener("click", function(e) {
     if (!isMuted) clickSound.play().catch(e => {});
     showRewardedAd(e);
