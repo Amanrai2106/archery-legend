@@ -63,6 +63,63 @@ var asrcd = "toky";
 var startPage = document.getElementById("startMenu");
 var startBtn = document.getElementById("startBtn");
 var rewardBtn = document.getElementById("rewardBtn");
+var storyOverlay = document.getElementById("storyOverlay");
+var storyTextContainer = document.getElementById("storyText");
+var skipStoryBtn = document.getElementById("skipStoryBtn");
+
+// Story content
+var storyLines = [
+    "Deep in the Misty Forest, a legend awaits...",
+    "You are the Chosen Archer, the only one who can master the shifting winds.",
+    "Your mission is simple: Hit the target to prove your skill.",
+    "The closer you hit to the gold, the more points you earn.",
+    "Score 7+ points to earn bonus arrows and keep the legend alive.",
+    "Tap or press any key to shoot. The forest is watching...",
+    "Are you ready?"
+];
+
+var storyIndex = 0;
+var charIndex = 0;
+var typingSpeed = 50;
+
+function typeWriter() {
+    if (storyIndex < storyLines.length) {
+        if (charIndex < storyLines[storyIndex].length) {
+            storyTextContainer.innerHTML += storyLines[storyIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(typeWriter, typingSpeed);
+        } else {
+            // Line finished, wait and then clear for next line
+            setTimeout(() => {
+                storyTextContainer.innerHTML = "";
+                charIndex = 0;
+                storyIndex++;
+                if (storyIndex < storyLines.length) {
+                    typeWriter();
+                } else {
+                    // Story finished
+                    endStory();
+                }
+            }, 2000);
+        }
+    }
+}
+
+function startStory() {
+    startPage.style.display = "none";
+    storyOverlay.style.display = "flex";
+    storyIndex = 0;
+    charIndex = 0;
+    storyTextContainer.innerHTML = "";
+    typeWriter();
+}
+
+function endStory() {
+    storyOverlay.style.display = "none";
+    startGameActual();
+}
+
+skipStoryBtn.addEventListener("click", endStory);
 
 // Ensure reward button is hidden at start
 rewardBtn.style.display = "none";
@@ -70,25 +127,11 @@ rewardBtn.style.display = "none";
 // Only restart game when the start button is specifically clicked
 startBtn.addEventListener("click", function(e) {
     if (!isMuted) clickSound.play().catch(e => {});
-    startGame();
+    startStory(); // Start story instead of immediate game
 });
 
-// Remove the whole-page click listener that was causing accidental restarts
-/*
-startPage.addEventListener("click", function(e) {
-    if (e.target !== rewardBtn && startPage.style.display !== "none") {
-        if (!isMuted) clickSound.play().catch(e => {});
-        startGame();
-    }
-});
-*/
-
-rewardBtn.addEventListener("click", function(e) {
-    if (!isMuted) clickSound.play().catch(e => {});
-    showRewardedAd(e);
-});
-
-function startGame(){
+// Rename original startGame to startGameActual
+function startGameActual(){
     startPage.style.display = "none";
     rewardBtn.style.display = "none"; // Hide reward button when starting
     loadGame();
@@ -111,6 +154,15 @@ function startGame(){
         }
     }catch(err){}
 
+}
+
+rewardBtn.addEventListener("click", function(e) {
+    if (!isMuted) clickSound.play().catch(e => {});
+    showRewardedAd(e);
+});
+
+function startGame() {
+    // This is now handled by startBtn -> startStory -> endStory -> startGameActual
 }
 
 var bestScore = 0;

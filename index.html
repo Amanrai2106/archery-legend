@@ -10,6 +10,10 @@
     </head>
     <body>
         <div id="mainContainer">
+        <div id="storyOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; color:#fff; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; box-sizing:border-box;">
+            <div id="storyText" style="font-size:24px; line-height:1.6; max-width:800px; margin-bottom:30px; font-family:'Courier New', Courier, monospace;"></div>
+            <button id="skipStoryBtn" style="background:#fff; color:#000; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold;">SKIP STORY</button>
+        </div>
         <div id="ui-overlay" style="position: absolute; top: 10px; right: 10px; z-index: 500;">
             <button id="muteBtn" style="background: rgba(0,0,0,0.5); border: 2px solid #fff; color: #fff; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; font-size: 20px;">🔊</button>
         </div>
