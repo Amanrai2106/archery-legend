@@ -211,15 +211,16 @@ function showRewardedAd(event) {
         event.preventDefault();
     }
     console.log("Attempting to show rewarded ad...");
+    
     if (typeof bridge !== 'undefined' && bridge.advertisement) {
         // Pause audio while ad is playing
         if (bgSound) bgSound.pause();
         
         bridge.advertisement.showRewarded()
-            .then((result) => {
-                // Check if ad was completed (result is usually undefined or true depending on bridge version)
-                // The .then() only triggers if the ad was watched successfully in many SDK versions
-                console.log("Rewarded ad completed successfully");
+            .then(() => {
+                // IMPORTANT: In Playgama Bridge, .then() is called ONLY if the ad was successfully watched to completion.
+                // If the user closes the ad early, it will trigger the .catch() block or won't reach here.
+                console.log("Rewarded ad watched to completion. Granting reward.");
                 
                 rewardBtn.style.display = "none";
                 startPage.style.display = "none";
@@ -231,11 +232,22 @@ function showRewardedAd(event) {
                 if (!isMuted && bgSound) bgSound.play().catch(e => {});
             })
             .catch(error => {
-                console.error("Rewarded ad failed or closed early:", error);
-                alert("Watch the full ad to get extra arrows!");
+                // This block is triggered if the ad fails to load OR if the user closes it early.
+                console.error("Rewarded ad failed or was closed early by user:", error);
+                alert("You must watch the full ad to receive +5 arrows!");
+                
+                // Show the reward button again just in case, and keep the menu open
+                rewardBtn.style.display = "block";
+                startPage.style.display = "flex";
+                
                 // Resume audio if not muted
                 if (!isMuted && bgSound) bgSound.play().catch(e => {});
             });
+    } else {
+        console.warn("Bridge SDK not found. Simulating reward for testing.");
+        window.continueGame(5);
+        rewardBtn.style.display = "none";
+        startPage.style.display = "none";
     }
 }
 
