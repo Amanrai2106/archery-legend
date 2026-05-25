@@ -607,6 +607,10 @@ function loadGame(){
                                 }
                                 document.getElementById("animCanvas").removeEventListener("click",shoot);
                                 document.body.removeEventListener("keydown",shoot);
+                                
+                                // Change button text to RESTART when game ends
+                                startBtn.innerHTML = "RESTART";
+                                
                                 startPage.style.display = "flex";
                                 document.getElementById("title").innerHTML = "Your Score<br>"+totalScore;
                                 if(bestScore < totalScore){
