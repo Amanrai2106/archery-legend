@@ -267,7 +267,21 @@ function loadGame(){
     var gameScore = document.getElementById("score");
     var totalScore = 0;
     var autoMove = false;
+    
+    // New Mechanics: Wind and Combo
+    var windSpeed = 0;
+    var comboCount = 0;
+    var multiplier = 1;
+    var windDisplay = document.getElementById("wind-display");
+    var comboDisplay = document.getElementById("combo-display");
 
+    function updateWind() {
+        // Random wind between -2 and 2
+        windSpeed = (Math.random() * 4 - 2).toFixed(1);
+        var direction = windSpeed > 0 ? "⬇️" : "⬆️";
+        windDisplay.innerHTML = "Wind: " + Math.abs(windSpeed) + " " + direction;
+    }
+    updateWind();
 
     var w = window.innerWidth;
     var h = window.innerHeight;
@@ -521,6 +535,9 @@ function loadGame(){
                 ctx.fill();
 
                 if(moveArrowCheck) {
+                    // Apply wind effect to arrow flight
+                    this.fy += parseFloat(windSpeed);
+
                     if(this.x < w-155){
                         this.x += this.dx;
                     }
@@ -539,22 +556,24 @@ function loadGame(){
                                 }
                                 moveArrowCheck = false;
                                 score++;
-                                //console.log(score);
-                                if(score === 4){
-                                    arc.dy = 5;
-                                }
-                                else if(score === 8){
-                                    autoMove = true;
-                                }
-
+                                
+                                // Update wind every shot
+                                updateWind();
 
                                 if(this.fy >= board.y-board.height/2 && this.fy <= board.y+board.height/2) {
-            try{
-                                    hitSound.play().catch(function(e){});
-            }catch(err){}
+                                    // HIT Logic
+                                    comboCount++;
+                                    multiplier = Math.min(5, 1 + Math.floor(comboCount/3)); // Max x5 multiplier
+                                    comboDisplay.innerHTML = "Combo: x" + multiplier + " (" + comboCount + ")";
+                                    comboDisplay.style.color = "#ffeb3b";
+
+                                    try{
+                                        hitSound.play().catch(function(e){});
+                                    }catch(err){}
                                     var scores = this.fy - board.y;
-                                    var currentScore = Math.round(board.height/20)-Math.round(Math.abs(scores/10));
-                                    if(currentScore >= 7){
+                                    var currentScore = (Math.round(board.height/20)-Math.round(Math.abs(scores/10))) * multiplier;
+                                    
+                                    if(currentScore/multiplier >= 7){
                                         newF();
                                         totalArr+=2;
                                         try{
@@ -566,9 +585,17 @@ function loadGame(){
                                 totalScore += currentScore;
                                 gameScore.innerHTML = totalScore;
 
+                                // Increase difficulty based on score
+                                if (totalScore > 50 && !autoMove) {
+                                    autoMove = true;
+                                    board.dy = 5;
+                                }
+                                if (totalScore > 150) {
+                                    board.dy = 7;
+                                }
+
                                 animateScore(currentScore,totalArr);
 
-                                //board.y += scores;// + Math.floor(Math.random()*20);
                                 boardY = board.y + scores;
                                 if(scores>=0){
                                     boardMove = true;
@@ -576,10 +603,15 @@ function loadGame(){
                                 else {
                                     boardMove = false;
                                 }
-
-                                //this.fy += scores;
                             }
-                            else updArr(totalArr);
+                            else {
+                                // MISS Logic
+                                comboCount = 0;
+                                multiplier = 1;
+                                comboDisplay.innerHTML = "Combo: x1";
+                                comboDisplay.style.color = "#fff";
+                                updArr(totalArr);
+                            }
                                 if(totalArr <= 0){
                                     // Stop BG sound on Game Over
                                     if (bgSound) {
