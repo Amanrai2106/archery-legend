@@ -95,7 +95,12 @@ function startGame(){
     try{
         if (!isMuted) {
             startSound.play().catch(function(e){});
-            if(bgSound.paused) bgSound.play().catch(function(e){});
+            
+            // Start BG music from beginning when game starts
+            if (bgSound) {
+                bgSound.currentTime = 0;
+                bgSound.play().catch(function(e){});
+            }
         }
         if(runCount == 0){
         endSound.play().catch(function(e){})
@@ -512,6 +517,12 @@ function loadGame(){
                             }
                             else updArr(totalArr);
                                 if(totalArr <= 0){
+                                    // Stop BG sound on Game Over
+                                    if (bgSound) {
+                                        bgSound.pause();
+                                        bgSound.currentTime = 0;
+                                    }
+
                                     // Show Reward Button and Interstitial Ad on Game Over
                                     if (typeof bridge !== 'undefined' && bridge.advertisement) {
                                         rewardBtn.style.display = "block"; // Show reward button
